@@ -20,7 +20,7 @@ function Home() {
 
   const fetchProducts = async () => {
     try {
-      const data = await getProducts();
+      const data = await getProducts({ limit: 12 });
       setProducts(data);
     } catch (error) {
       console.log(error);
@@ -33,7 +33,7 @@ function Home() {
     <>
       <Hero />
 
-      <h1>Latest Products</h1>
+      <h1 style={{ padding: "0 15px", marginBottom: "20px" }}>Latest Products</h1>
 
       {loading ? (
         <Spin size="large" />

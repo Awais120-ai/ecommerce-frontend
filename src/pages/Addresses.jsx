@@ -115,7 +115,7 @@ function Addresses() {
 
 
     return (
-    <div style={{ padding: 30 }}>
+    <div style={{ padding: "15px" }}>
       <Space
         style={{
           width: "100%",
@@ -157,42 +157,29 @@ function Addresses() {
           form={form}
         >
           <Form.Item
-            label="Full Name"
-            name="full_name"
+            label="Address Type"
+            name="address_type"
             rules={[
               {
                 required: true,
-                message: "Enter Full Name",
+                message: "Select Address Type",
               },
             ]}
           >
-            <Input />
+            <Input placeholder="e.g., Home, Work, Other" />
           </Form.Item>
 
           <Form.Item
-            label="Phone"
-            name="phone"
+            label="Street Address"
+            name="street_address"
             rules={[
               {
                 required: true,
-                message: "Enter Phone Number",
+                message: "Enter Street Address",
               },
             ]}
           >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Country"
-            name="country"
-            rules={[
-              {
-                required: true,
-                message: "Enter Country",
-              },
-            ]}
-          >
-            <Input />
+            <Input.TextArea rows={3} />
           </Form.Item>
 
           <Form.Item
@@ -202,6 +189,19 @@ function Addresses() {
               {
                 required: true,
                 message: "Enter City",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="State"
+            name="state"
+            rules={[
+              {
+                required: true,
+                message: "Enter State",
               },
             ]}
           >
@@ -222,16 +222,30 @@ function Addresses() {
           </Form.Item>
 
           <Form.Item
-            label="Address"
-            name="address"
+            label="Country"
+            name="country"
+            initialValue="Pakistan"
             rules={[
               {
                 required: true,
-                message: "Enter Address",
+                message: "Enter Country",
               },
             ]}
           >
-            <Input.TextArea rows={4} />
+            <Input disabled />
+          </Form.Item>
+
+          <Form.Item
+            label="Phone Number"
+            name="phone_number"
+            rules={[
+              {
+                required: true,
+                message: "Enter Phone Number",
+              },
+            ]}
+          >
+            <Input />
           </Form.Item>
         </Form>
       </Modal>
@@ -245,7 +259,7 @@ function Addresses() {
           {addresses.map((address) => (
             <Col xs={24} md={12} lg={8} key={address.id}>
               <Card
-                title={address.full_name}
+                title={address.address_type}
                 extra={
                   <Space>
                     <Button
@@ -269,11 +283,11 @@ function Addresses() {
                 }
               >
                 <p>
-                  <b>Phone:</b> {address.phone}
+                  <b>Phone:</b> {address.phone_number}
                 </p>
 
                 <p>
-                  <b>Country:</b> {address.country}
+                  <b>Address:</b> {address.street_address}
                 </p>
 
                 <p>
@@ -281,11 +295,15 @@ function Addresses() {
                 </p>
 
                 <p>
+                  <b>State:</b> {address.state}
+                </p>
+
+                <p>
                   <b>Postal Code:</b> {address.postal_code}
                 </p>
 
                 <p>
-                  <b>Address:</b> {address.address}
+                  <b>Country:</b> {address.country}
                 </p>
               </Card>
             </Col>

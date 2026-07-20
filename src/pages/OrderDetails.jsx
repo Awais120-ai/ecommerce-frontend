@@ -64,10 +64,37 @@ function OrderDetails() {
     );
   }
 
+  const formatOrderDate = (dateString) => {
+    if (!dateString) return "Date unavailable";
+    try {
+      const date = new Date(dateString);
+      const dateFormatter = new Intl.DateTimeFormat("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      const timeFormatter = new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+      return (
+        <>
+          <div>{dateFormatter.format(date)}</div>
+          <div style={{ marginTop: 4 }}>
+            {timeFormatter.format(date)}
+          </div>
+        </>
+      );
+    } catch {
+      return "Date unavailable";
+    }
+  };
+
   return (
     <div
       style={{
-        padding: 30,
+        padding: 15,
         maxWidth: 1200,
         margin: "0 auto",
       }}
@@ -114,6 +141,126 @@ function OrderDetails() {
             </Title>
           </Col>
         </Row>
+
+        <Row gutter={16} style={{ marginTop: 20 }}>
+          <Col span={12}>
+            <Text strong>Order Date:</Text>
+
+            <br />
+
+            {formatOrderDate(order.created_at)}
+          </Col>
+
+          <Col span={12}>
+            <Text strong>Payment Method:</Text>
+
+            <br />
+
+            <Text>
+              {order.payment_method &&
+              order.payment_method.trim()
+                ? order.payment_method
+                : "-"}
+            </Text>
+          </Col>
+        </Row>
+
+        {order.address && (
+          <>
+            <Divider />
+
+            <Title level={3}>
+              Shipping Address
+            </Title>
+
+            <Card
+              style={{
+                background: "#fafafa",
+                marginBottom: 20,
+              }}
+            >
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Text strong>Address Type:</Text>
+
+                  <br />
+
+                  <Text>
+                    {order.address
+                      .address_type || "N/A"}
+                  </Text>
+                </Col>
+
+                <Col span={12}>
+                  <Text strong>Phone:</Text>
+
+                  <br />
+
+                  <Text>
+                    {order.address
+                      .phone_number || "N/A"}
+                  </Text>
+                </Col>
+              </Row>
+
+              <Row gutter={16} style={{ marginTop: 12 }}>
+                <Col span={12}>
+                  <Text strong>Street Address:</Text>
+
+                  <br />
+
+                  <Text>
+                    {order.address
+                      .street_address || "N/A"}
+                  </Text>
+                </Col>
+
+                <Col span={12}>
+                  <Text strong>City:</Text>
+
+                  <br />
+
+                  <Text>
+                    {order.address.city || "N/A"}
+                  </Text>
+                </Col>
+              </Row>
+
+              <Row gutter={16} style={{ marginTop: 12 }}>
+                <Col span={8}>
+                  <Text strong>State:</Text>
+
+                  <br />
+
+                  <Text>
+                    {order.address.state || "N/A"}
+                  </Text>
+                </Col>
+
+                <Col span={8}>
+                  <Text strong>Postal Code:</Text>
+
+                  <br />
+
+                  <Text>
+                    {order.address
+                      .postal_code || "N/A"}
+                  </Text>
+                </Col>
+
+                <Col span={8}>
+                  <Text strong>Country:</Text>
+
+                  <br />
+
+                  <Text>
+                    {order.address.country || "N/A"}
+                  </Text>
+                </Col>
+              </Row>
+            </Card>
+          </>
+        )}
 
         <Divider />
 

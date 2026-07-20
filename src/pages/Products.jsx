@@ -32,17 +32,34 @@ function Products() {
   const [categoryId, setCategoryId] = useState(undefined);
   const [minPrice, setMinPrice] = useState(undefined);
   const [maxPrice, setMaxPrice] = useState(undefined);
-  const [sort, setSort] = useState("id");
+  const [sort, setSort] = useState("-id");
   const navigate = useNavigate();
+
+  // Map sort display names to backend values
+  const sortMapping = {
+    "-id": "-id",
+    "price_asc": "price",
+    "price_desc": "-price",
+    "name_asc": "name",
+  };
 
   // Load Products
   const loadProducts = async () => {
     try {
       setLoading(true);
 
-      const data = await productService.getProducts({
-  limit: 1000,
-});
+      // Build query parameters
+      const params = {
+        limit: 1000,
+      };
+
+      if (search) params.search = search;
+      if (categoryId) params.category_id = categoryId;
+      if (minPrice !== undefined && minPrice !== null) params.min_price = minPrice;
+      if (maxPrice !== undefined && maxPrice !== null) params.max_price = maxPrice;
+      if (sort) params.sort = sortMapping[sort] || sort;
+
+      const data = await productService.getProducts(params);
       setProducts(data);
     } catch (error) {
       console.error(error);
@@ -67,7 +84,7 @@ function Products() {
     setCategoryId(undefined);
     setMinPrice(undefined);
     setMaxPrice(undefined);
-    setSort("id");
+    setSort("-id");
   };
 
   // Load Categories Once
@@ -92,12 +109,12 @@ function Products() {
   }, []);
 
   return (
-    <div style={{ padding: 30 }}>
-      <Title level={2}>Products</Title>
+    <div style={{ padding: "20px" }}>
+      <Title level={2} style={{ marginBottom: "20px" }}>Products</Title>
 
-      <Row gutter={16} style={{ marginBottom: 20 }}>
+      <Row gutter={[12, 12]} style={{ marginBottom: 20 }}>
         {/* Search */}
-        <Col span={6}>
+        <Col xs={24} sm={24} md={6}>
           <Input
             placeholder="Search Product"
             value={search}
@@ -108,7 +125,7 @@ function Products() {
         </Col>
 
         {/* Category */}
-        <Col span={4}>
+        <Col xs={24} sm={12} md={5}>
           <Select
             style={{ width: "100%" }}
             placeholder="Category"
@@ -128,7 +145,7 @@ function Products() {
         </Col>
 
         {/* Min Price */}
-        <Col span={3}>
+        <Col xs={12} sm={12} md={3}>
           <InputNumber
             style={{ width: "100%" }}
             placeholder="Min Price"
@@ -138,7 +155,7 @@ function Products() {
         </Col>
 
         {/* Max Price */}
-        <Col span={3}>
+        <Col xs={12} sm={12} md={3}>
           <InputNumber
             style={{ width: "100%" }}
             placeholder="Max Price"
@@ -148,32 +165,32 @@ function Products() {
         </Col>
 
         {/* Sort */}
-        <Col span={4}>
+        <Col xs={24} sm={12} md={4}>
           <Select
             style={{ width: "100%" }}
             value={sort}
             onChange={setSort}
           >
-            <Option value="id">
+            <Option value="-id">
               Newest
             </Option>
 
-            <Option value="name">
-              Name
+            <Option value="price_asc">
+              Price Low to High
             </Option>
 
-            <Option value="price">
-              Price
+            <Option value="price_desc">
+              Price High to Low
             </Option>
 
-            <Option value="stock">
-              Stock
+            <Option value="name_asc">
+              Name A-Z
             </Option>
           </Select>
         </Col>
 
         {/* Clear Button */}
-        <Col span={4}>
+        <Col xs={24} sm={12} md={3}>
           <Button
             danger
             block

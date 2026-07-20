@@ -38,6 +38,16 @@ const cartService = {
   return response.data;
 },
 
+  // Buy Now (backend reserves the item without adding to cart)
+  buyNow: async (buyNowData) => {
+    const response = await api.post(
+      "/cart/buy-now/",
+      buyNowData
+    );
+
+    return response.data;
+  },
+
 
 };
 

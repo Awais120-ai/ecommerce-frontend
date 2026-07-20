@@ -28,7 +28,7 @@ function Cart() {
       setLoading(true);
 
       const data = await cartService.getCart();
-
+      console.log("Cart API Response:", data);
       setCartItems(data);
     } catch (error) {
       console.log(error);
@@ -59,11 +59,51 @@ function Cart() {
 
 
   const updateQuantity = async (cartId, currentQuantity, change) => {
-  const newQuantity = currentQuantity + change;
+  if (change < 0) {
+    const newQuantity = currentQuantity + change;
 
-  if (newQuantity < 1) return;
+    if (newQuantity < 1) return;
+
+    try {
+      await cartService.updateCart(cartId, newQuantity);
+
+      emitStockRefresh();
+      fetchCart();
+    } catch (error) {
+      console.log(error);
+
+      message.error("Failed to update quantity");
+    }
+    return;
+  }
 
   try {
+    const latestCart = await cartService.getCart();
+
+    const latestItem = latestCart.find((i) => i.id === cartId);
+
+    if (!latestItem || !latestItem.product) return;
+
+    const totalProductStock = latestItem.product.stock;
+
+    const otherReserved = latestCart
+      .filter(
+        (i) =>
+          i.id !== cartId &&
+          i.product &&
+          String(i.product.id) === String(latestItem.product.id)
+      )
+      .reduce((sum, i) => sum + i.quantity, 0);
+
+    const maxQuantity = totalProductStock - otherReserved;
+
+    if (currentQuantity >= maxQuantity) {
+      message.info("Maximum available stock reached");
+      return;
+    }
+
+    const newQuantity = currentQuantity + 1;
+
     await cartService.updateCart(cartId, newQuantity);
 
     emitStockRefresh();
@@ -77,7 +117,7 @@ function Cart() {
 
 
   const total = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) => item.product ? sum + item.product.price * item.quantity : sum,
     0
   );
 
@@ -98,18 +138,34 @@ function Cart() {
     <div
       style={{
         maxWidth: 1200,
-        margin: "30px auto",
-        padding: "20px",
+        margin: "20px auto",
+        padding: "15px",
       }}
     >
-      <Title level={2}>🛒 My Cart</Title>
+      <Title level={2} style={{ marginBottom: "20px" }}>🛒 My Cart</Title>
 
       {cartItems.length === 0 ? (
         <Empty description="Your cart is empty" />
       ) : (
         <>
           <Row gutter={[20, 20]}>
-            {cartItems.map((item) => (
+            {cartItems.map((item) => {
+              if (!item.product) return null;
+
+              const otherReserved = cartItems
+                .filter(
+                  (i) =>
+                    i.id !== item.id &&
+                    i.product &&
+                    String(i.product.id) === String(item.product.id)
+                )
+                .reduce((sum, i) => sum + i.quantity, 0);
+
+              const maxQuantity = item.product.stock - otherReserved;
+
+              const atMaxStock = item.quantity >= maxQuantity;
+
+              return (
               <Col span={24} key={item.id}>
                 <Card
                   hoverable
@@ -197,6 +253,7 @@ function Cart() {
   </Tag>
 
   <Button
+    disabled={atMaxStock}
     onClick={() =>
       updateQuantity(
         item.id,
@@ -253,7 +310,8 @@ function Cart() {
                   </Row>
                 </Card>
               </Col>
-            ))}
+              );
+            })}
           </Row>
 
           <Card

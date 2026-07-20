@@ -147,11 +147,7 @@ const addToWishlist = async () => {
 const buyNow = async () => {
   if (!product) return;
 
-  if (product.stock === 0) {
-    if (!cartItemExists) return;
-    navigate("/checkout");
-    return;
-  }
+  if (product.stock === 0 && !cartItemExists) return;
 
   try {
     const cartData = await cartService.getCart();
@@ -162,20 +158,32 @@ const buyNow = async () => {
     );
 
     if (found) {
-      navigate("/checkout");
+      navigate("/checkout", {
+        state: {
+          buyNow: true,
+          product: found.product,
+          quantity: found.quantity,
+        },
+      });
       return;
     }
+
+    await cartService.buyNow({
+      product_id: product.id,
+      quantity,
+    });
+
+    navigate("/checkout", {
+      state: {
+        buyNow: true,
+        product,
+        quantity,
+      },
+    });
   } catch (error) {
     console.log(error);
+    message.error("Unable to process Buy Now");
   }
-
-  navigate("/checkout", {
-    state: {
-      buyNow: true,
-      product,
-      quantity,
-    },
-  });
 };
   useEffect(() => {
 

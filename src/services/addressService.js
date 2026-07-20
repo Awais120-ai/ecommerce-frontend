@@ -30,13 +30,8 @@ const addressService = {
     const response = await api.get(`/addresses/${id}`);
     return response.data;
   },
-  
-  createAddress: async (data) => {
-  const response = await api.post("/addresses/", data);
-  return response.data;
-}
-
-
 };
+
+
 
 export default addressService;
