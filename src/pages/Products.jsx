@@ -32,15 +32,15 @@ function Products() {
   const [categoryId, setCategoryId] = useState(undefined);
   const [minPrice, setMinPrice] = useState(undefined);
   const [maxPrice, setMaxPrice] = useState(undefined);
-  const [sort, setSort] = useState("-id");
+  const [sort, setSort] = useState("newest");
   const navigate = useNavigate();
 
   // Map sort display names to backend values
   const sortMapping = {
-    "-id": "-id",
-    "price_asc": "price",
-    "price_desc": "-price",
-    "name_asc": "name",
+    newest: "newest",
+    price_asc: "price_asc",
+    price_desc: "price_desc",
+    name_asc: "name_asc",
   };
 
   // Load Products
@@ -84,7 +84,7 @@ function Products() {
     setCategoryId(undefined);
     setMinPrice(undefined);
     setMaxPrice(undefined);
-    setSort("-id");
+    setSort("newest");
   };
 
   // Load Categories Once
@@ -171,7 +171,7 @@ function Products() {
             value={sort}
             onChange={setSort}
           >
-            <Option value="-id">
+            <Option value="newest">
               Newest
             </Option>
 

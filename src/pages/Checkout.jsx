@@ -124,14 +124,21 @@ useEffect(() => {
 
   try {
     // Step 1: Create Order
-    const order = await orderService.checkout({
-  address_id: selectedAddress,
-  payment_method: paymentMethod,
+    let order;
 
-  buy_now: buyNow,
-  product_id: buyNow ? buyNowProduct.id : null,
-  quantity: buyNow ? buyNowQuantity : null,
-});
+if (buyNow) {
+  order = await orderService.buyNow({
+    product_id: buyNowProduct.id,
+    quantity: buyNowQuantity,
+    address_id: selectedAddress,
+    payment_method: paymentMethod,
+  });
+} else {
+  order = await orderService.checkout({
+    address_id: selectedAddress,
+    payment_method: paymentMethod,
+  });
+}
 
     // Step 2: Create Payment
     await paymentService.processPayment({

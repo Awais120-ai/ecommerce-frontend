@@ -20,6 +20,8 @@ import {
   message,
 } from "antd";
 
+import { useAuth } from "../context/AuthContext";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import productService from "../services/productService";
 import cartService from "../services/cartService";
 import wishlistService from "../services/wishlistService";
@@ -37,12 +39,13 @@ function ProductDetails() {
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
+  
+  const { isLoggedIn } = useAuth();
 
   const [quantity, setQuantity] = useState(1);
   const [inWishlist, setInWishlist] = useState(false);
   const [wishlistItemId, setWishlistItemId] = useState(null);
   const [addingToCart, setAddingToCart] = useState(false);
-  const [cartItemExists, setCartItemExists] = useState(false);
 
   const loadProduct = async () => {
     try {
@@ -55,56 +58,73 @@ function ProductDetails() {
     }
   };
 
-  const loadCartStatus = async () => {
-    try {
-      const cartData = await cartService.getCart();
-      const found = cartData.find(
-        (item) =>
-          item.product &&
-          String(item.product.id) === String(id)
-      );
 
-      setCartItemExists(Boolean(found));
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const addToCart = async () => {
-    if (!product || product.stock <= 0 || addingToCart) return;
+  if (!isLoggedIn) {
+    message.warning("Please login first");
+    navigate("/login");
+    return;
+  }
 
-    try {
-      setAddingToCart(true);
+  if (!product || product.stock <= 0 || addingToCart) return;
 
-      await cartService.addToCart({
-        product_id: product.id,
-        quantity,
-      });
-
-      message.success("Product added to cart");
-      setCartItemExists(true);
-      await loadProduct();
-      emitStockRefresh();
-    } catch (error) {
-      console.log(error);
-      message.error("Unable to add product");
-    } finally {
-      setAddingToCart(false);
-    }
-  };
-
-const addToWishlist = async () => {
   try {
-    await wishlistService.addToWishlist({
+    setAddingToCart(true);
+
+    await cartService.addToCart({
       product_id: product.id,
+      quantity,
     });
 
-    message.success("Added to wishlist");
+    message.success("Product added to cart");
+    await loadProduct();
+    emitStockRefresh();
   } catch (error) {
     console.log(error);
-    message.error("Unable to add wishlist");
+    message.error("Unable to add product");
+  } finally {
+    setAddingToCart(false);
   }
 };
+
+
+
+const toggleWishlist = async () => {
+  if (!isLoggedIn) {
+    message.warning("Please login first");
+    navigate("/login");
+    return;
+  }
+
+  if (!product) return;
+
+  if (inWishlist) {
+    try {
+      await removeFromWishlist(wishlistItemId);
+      setInWishlist(false);
+      setWishlistItemId(null);
+    } catch (error) {}
+  } else {
+    try {
+      const data = await wishlistService.addToWishlist({
+        product_id: product.id,
+      });
+
+      if (data?.id) {
+        setWishlistItemId(data.id);
+      }
+
+      setInWishlist(true);
+      message.success("Added to wishlist");
+    } catch (error) {
+      console.log(error);
+      message.error("Unable to add wishlist");
+    }
+  }
+};
+
+
 
   const removeFromWishlist = async (id) => {
     try {
@@ -117,74 +137,53 @@ const addToWishlist = async () => {
     }
   };
 
-  const toggleWishlist = async () => {
-    if (!product) return;
+  // const toggleWishlist = async () => {
+  //   if (!product) return;
 
-    if (inWishlist) {
-      // remove
-      try {
-        await removeFromWishlist(wishlistItemId);
-        setInWishlist(false);
-        setWishlistItemId(null);
-      } catch (error) {
-        // errors handled in removeFromWishlist
-      }
-    } else {
-      // add
-      try {
-        const data = await wishlistService.addToWishlist({ product_id: product.id });
-        // try to capture created wishlist id if returned
-        if (data && data.id) setWishlistItemId(data.id);
-        setInWishlist(true);
-        message.success("Added to wishlist");
-      } catch (error) {
-        console.log(error);
-        message.error("Unable to add wishlist");
-      }
-    }
-  };
+  //   if (inWishlist) {
+  //     // remove
+  //     try {
+  //       await removeFromWishlist(wishlistItemId);
+  //       setInWishlist(false);
+  //       setWishlistItemId(null);
+  //     } catch (error) {
+  //       // errors handled in removeFromWishlist
+  //     }
+  //   } else {
+  //     // add
+  //     try {
+  //       const data = await wishlistService.addToWishlist({ product_id: product.id });
+  //       // try to capture created wishlist id if returned
+  //       if (data && data.id) setWishlistItemId(data.id);
+  //       setInWishlist(true);
+  //       message.success("Added to wishlist");
+  //     } catch (error) {
+  //       console.log(error);
+  //       message.error("Unable to add wishlist");
+  //     }
+  //   }
+  // };
 
-const buyNow = async () => {
+const buyNow = () => {
+  if (!isLoggedIn) {
+    message.warning("Please login first");
+    navigate("/login");
+    return;
+  }
+
   if (!product) return;
 
-  if (product.stock === 0 && !cartItemExists) return;
-
-  try {
-    const cartData = await cartService.getCart();
-    const found = cartData.find(
-      (item) =>
-        item.product &&
-        String(item.product.id) === String(id)
-    );
-
-    if (found) {
-      navigate("/checkout", {
-        state: {
-          buyNow: true,
-          product: found.product,
-          quantity: found.quantity,
-        },
-      });
-      return;
-    }
-
-    await cartService.buyNow({
-      product_id: product.id,
+  navigate("/checkout", {
+    state: {
+      buyNow: true,
+      product,
       quantity,
-    });
-
-    navigate("/checkout", {
-      state: {
-        buyNow: true,
-        product,
-        quantity,
-      },
-    });
-  } catch (error) {
-    console.log(error);
-    message.error("Unable to process Buy Now");
-  }
+    },
+  });
 };
+
+
+
   useEffect(() => {
 
     const init = async () => {
@@ -207,7 +206,6 @@ const buyNow = async () => {
     };
 
     init();
-    loadCartStatus();
 
     const unsubscribe = subscribeStockRefresh(loadProduct);
     return () => unsubscribe();
@@ -227,6 +225,8 @@ const buyNow = async () => {
   }
 
   return (
+
+
   <div
     style={{
       maxWidth: "1200px",
@@ -234,6 +234,20 @@ const buyNow = async () => {
       padding: "20px",
     }}
   >
+
+    <Button
+  type="default"
+  icon={<ArrowLeftOutlined />}
+  onClick={() => navigate("/products")}
+  style={{
+    marginBottom: 20,
+  }}
+>
+  Back To Products
+</Button>
+
+   
+
     <Row gutter={[40, 40]} align="middle">
       <Col xs={24} md={10}>
         <div
@@ -368,7 +382,7 @@ const buyNow = async () => {
     danger
     size="large"
     block
-    disabled={product.stock === 0 && !cartItemExists}
+    disabled={product.stock <= 0}
     onClick={buyNow}
   >
     Buy Now

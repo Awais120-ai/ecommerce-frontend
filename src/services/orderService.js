@@ -11,6 +11,16 @@ const orderService = {
     return response.data;
   },
 
+  // ✅ Buy Now
+  buyNow: async (buyNowData) => {
+    const response = await api.post(
+      "/orders/buy-now",
+      buyNowData
+    );
+
+    return response.data;
+  },
+
   // Get Orders
   getOrders: async () => {
     const response = await api.get("/orders/");

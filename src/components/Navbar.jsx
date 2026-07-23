@@ -20,6 +20,7 @@ import {
 
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 const { Header } = Layout;
 const { useBreakpoint } = Grid;
@@ -31,12 +32,11 @@ function Navbar() {
 
   const [open, setOpen] = useState(false);
 
-  const isLoggedIn = !!localStorage.getItem("token");
+  const auth = useAuth();
+  const isLoggedIn = auth.isLoggedIn;
 
   const handleLogout = () => {
-    authService.logout();
-    navigate("/login");
-    window.location.reload();
+    auth.logout();
   };
 
   const menuItems = [
@@ -123,15 +123,35 @@ function Navbar() {
               }}
             />
 
-            <Menu
-              theme="dark"
-              mode="horizontal"
-              selectable={false}
-              items={[menuItems[6]]}
-              style={{
-                borderBottom: "none",
-              }}
-            />
+
+
+            {isLoggedIn ? (
+  <Button
+    type="link"
+    style={{
+      color: "#fff",
+      fontWeight: 600,
+    }}
+    onClick={handleLogout}
+  >
+    Logout
+  </Button>
+) : (
+  <Button
+    type="link"
+    style={{
+      color: "#fff",
+      fontWeight: 600,
+    }}
+    onClick={() => navigate("/login")}
+  >
+    Login
+  </Button>
+)}
+
+
+
+
           </>
         ) : (
           <Button

@@ -1,29 +1,48 @@
 import { useState } from "react";
 import { Card, Button, Tag, Rate, message } from "antd";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
 import cartService from "../services/cartService";
 import { emitStockRefresh } from "../utils/stockRefresh";
 
 function ProductCard({ product }) {
+
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+
   const [expanded, setExpanded] = useState(false);
 
   const handleAddToCart = async () => {
-    try {
-      await cartService.addToCart({
-        product_id: product.id,
-        quantity: 1,
-      });
 
-      message.success("Product added to cart");
-      emitStockRefresh();
-    } catch (error) {
-      console.log(error);
+  if (!isLoggedIn) {
+    message.warning("Please login first");
+    navigate("/login");
+    return;
+  }
 
-      message.error(
-        error.response?.data?.detail ||
-          "Failed to add product"
-      );
-    }
-  };
+  try {
+
+    await cartService.addToCart({
+      product_id: product.id,
+      quantity: 1,
+    });
+
+    message.success("Product added to cart");
+    emitStockRefresh();
+
+  } catch (error) {
+
+    console.log(error);
+
+    message.error(
+      error.response?.data?.detail ||
+      "Failed to add product"
+    );
+
+  }
+
+};
 
   return (
     <Card

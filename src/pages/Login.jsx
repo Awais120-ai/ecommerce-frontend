@@ -1,17 +1,19 @@
 import { Card, Form, Input, Button, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
+import { LeftOutlined } from "@ant-design/icons";
 import { message } from "antd";
-import authService from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 const { Title } = Typography;
 
 function Login() {
     const navigate = useNavigate();
+    const auth = useAuth();
 
     const onFinish = async (values) => {
       console.log(values);
   try {
-    await authService.login(values);
+    await auth.login(values);
 
     message.success("Login Successful");
 
@@ -25,29 +27,44 @@ function Login() {
 };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: "#f5f5f5",
-      }}
-    >
-      <Card
+    <div>
+      <Button
+        icon={<LeftOutlined />}
+        type="default"
+        onClick={() => navigate("/")}
         style={{
-          width: 400,
-          borderRadius: 10,
+          position: "fixed",
+          top: 20,
+          left: 20,
+          zIndex: 1000,
         }}
       >
-        <Title
-          level={2}
+        Back to Home
+      </Button>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          background: "#f5f5f5",
+        }}
+      >
+        <Card
           style={{
-            textAlign: "center",
+            width: 400,
+            borderRadius: 10,
           }}
         >
-          Login
-        </Title>
+          <Title
+            level={2}
+            style={{
+              textAlign: "center",
+            }}
+          >
+            Login
+          </Title>
 
         <Form layout="vertical" onFinish={onFinish}>
           <Form.Item
@@ -92,6 +109,7 @@ function Login() {
         </Form>
       </Card>
     </div>
+  </div>
   );
 }
 

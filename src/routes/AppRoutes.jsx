@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-
+import ProtectedRoute from "../components/ProtectedRoute";
 import MainLayout from "../layouts/MainLayout";
 
 import Home from "../pages/Home";
@@ -54,74 +54,90 @@ export default function AppRoutes() {
       />
 
       <Route
-        path="/cart"
-        element={
-          <MainLayout>
-            <Cart />
-          </MainLayout>
-        }
-      />
+  path="/cart"
+  element={
+    <ProtectedRoute>
+      <MainLayout>
+        <Cart />
+      </MainLayout>
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/wishlist"
         element={
+          <ProtectedRoute> 
           <MainLayout>
             <Wishlist />
           </MainLayout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/checkout"
         element={
+          <ProtectedRoute> 
           <MainLayout>
             <Checkout />
           </MainLayout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/payment"
         element={
+          <ProtectedRoute> 
           <MainLayout>
             <Payment />
           </MainLayout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/orders"
         element={
+          <ProtectedRoute> 
           <MainLayout>
             <Orders />
           </MainLayout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/orders/:id"
         element={
+          <ProtectedRoute> 
           <MainLayout>
             <OrderDetails />
           </MainLayout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/addresses"
         element={
+          <ProtectedRoute>
           <MainLayout>
             <Addresses />
           </MainLayout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/profile"
         element={
+          <ProtectedRoute>
           <MainLayout>
             <Profile />
           </MainLayout>
+          </ProtectedRoute>
         }
       />
 
