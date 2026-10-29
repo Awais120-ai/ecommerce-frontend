@@ -1,155 +1,64 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+import { Spin } from "antd";
 import ProtectedRoute from "../components/ProtectedRoute";
 import MainLayout from "../layouts/MainLayout";
 
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
-import Products from "../pages/Products";
-import ProductDetails from "../pages/ProductDetails";
-import Cart from "../pages/Cart";
-import Wishlist from "../pages/Wishlist";
-import Checkout from "../pages/Checkout";
-import Orders from "../pages/Orders";
-import OrderDetails from "../pages/OrderDetails";
-import Addresses from "../pages/Addresses";
-import Profile from "../pages/Profile";
-import Payment from "../pages/Payment";
-import NotFound from "../pages/NotFound";
+const Home = lazy(() => import("../pages/Home"));
+const Login = lazy(() => import("../pages/Login"));
+const Register = lazy(() => import("../pages/Register"));
+const Products = lazy(() => import("../pages/Products"));
+const ProductDetails = lazy(() => import("../pages/ProductDetails"));
+const Cart = lazy(() => import("../pages/Cart"));
+const Wishlist = lazy(() => import("../pages/Wishlist"));
+const Checkout = lazy(() => import("../pages/Checkout"));
+const Orders = lazy(() => import("../pages/Orders"));
+const OrderDetails = lazy(() => import("../pages/OrderDetails"));
+const Addresses = lazy(() => import("../pages/Addresses"));
+const Profile = lazy(() => import("../pages/Profile"));
+const Payment = lazy(() => import("../pages/Payment"));
+const NotFound = lazy(() => import("../pages/NotFound"));
+
+function PageLoader() {
+  return (
+    <div style={{ display: "grid", placeItems: "center", minHeight: "40vh" }}>
+      <Spin size="large" />
+    </div>
+  );
+}
+
+function withLayout(Page, protectedRoute = false) {
+  const content = (
+    <MainLayout>
+      <Suspense fallback={<PageLoader />}>
+        <Page />
+      </Suspense>
+    </MainLayout>
+  );
+
+  return protectedRoute ? <ProtectedRoute>{content}</ProtectedRoute> : content;
+}
 
 export default function AppRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      {/* Login/Register without Navbar */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-
-      {/* All pages with Navbar + Footer */}
-      <Route
-        path="/"
-        element={
-          <MainLayout>
-            <Home />
-          </MainLayout>
-        }
-      />
-
-      <Route
-        path="/products"
-        element={
-          <MainLayout>
-            <Products />
-          </MainLayout>
-        }
-      />
-
-      <Route
-        path="/products/:id"
-        element={
-          <MainLayout>
-            <ProductDetails />
-          </MainLayout>
-        }
-      />
-
-      <Route
-  path="/cart"
-  element={
-    <ProtectedRoute>
-      <MainLayout>
-        <Cart />
-      </MainLayout>
-    </ProtectedRoute>
-  }
-/>
-
-      <Route
-        path="/wishlist"
-        element={
-          <ProtectedRoute> 
-          <MainLayout>
-            <Wishlist />
-          </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/checkout"
-        element={
-          <ProtectedRoute> 
-          <MainLayout>
-            <Checkout />
-          </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/payment"
-        element={
-          <ProtectedRoute> 
-          <MainLayout>
-            <Payment />
-          </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/orders"
-        element={
-          <ProtectedRoute> 
-          <MainLayout>
-            <Orders />
-          </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/orders/:id"
-        element={
-          <ProtectedRoute> 
-          <MainLayout>
-            <OrderDetails />
-          </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/addresses"
-        element={
-          <ProtectedRoute>
-          <MainLayout>
-            <Addresses />
-          </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-          <MainLayout>
-            <Profile />
-          </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="*"
-        element={
-          <MainLayout>
-            <NotFound />
-          </MainLayout>
-        }
-      />
-
-    </Routes>
+        <Route path="/" element={withLayout(Home)} />
+        <Route path="/products" element={withLayout(Products)} />
+        <Route path="/products/:id" element={withLayout(ProductDetails)} />
+        <Route path="/cart" element={withLayout(Cart, true)} />
+        <Route path="/wishlist" element={withLayout(Wishlist, true)} />
+        <Route path="/checkout" element={withLayout(Checkout, true)} />
+        <Route path="/payment" element={withLayout(Payment, true)} />
+        <Route path="/orders" element={withLayout(Orders, true)} />
+        <Route path="/orders/:id" element={withLayout(OrderDetails, true)} />
+        <Route path="/addresses" element={withLayout(Addresses, true)} />
+        <Route path="/profile" element={withLayout(Profile, true)} />
+        <Route path="*" element={withLayout(NotFound)} />
+      </Routes>
+    </Suspense>
   );
 }
